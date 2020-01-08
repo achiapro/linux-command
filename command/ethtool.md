@@ -7,7 +7,7 @@ ethtool
 
 ethtool命令用于获取以太网卡的配置信息，或者修改这些配置。这个命令比较复杂，功能特别多。
 
-### 语法  
+###  语法
 
 ```shell
 ethtool [ -a | -c | -g | -i | -d | -k | -r | -S |] ethX
@@ -23,7 +23,7 @@ ethtool [-s] ethX [speed 10|100|1000] [duplex half|full] [autoneg on|off] [port 
 [wol p|u|m|b|a|g|s|d...] [sopass xx:yy:zz:aa:bb:cc] [msglvl N]
 ```
 
-### 选项  
+###  选项
 
 ```shell
 -a 查看网卡中 接收模块RX、发送模块TX和Autonegotiate模块的状态：启动on 或 停用off。
@@ -45,7 +45,7 @@ ethtool [-s] ethX [speed 10|100|1000] [duplex half|full] [autoneg on|off] [port 
 -s 修改网卡的部分配置，包括网卡速度、单工/全双工模式、mac地址等。
 ```
 
-### 数据来源  
+###  数据来源
 
 Ethtool命令显示的信息来源于网卡驱动层，即TCP/ip协议的链路层。该命令在Linux内核中实现的逻辑层次为：
 
@@ -54,149 +54,80 @@ Ethtool命令显示的信息来源于网卡驱动层，即TCP/ip协议的链路�
 网卡驱动负责实现（部分）这些函数，并将其封装入`ethtool_ops`结构体，为网络核心层提供统一的调用接口。因此，不同的网卡驱动会给应用层返回不同的信息。`Ethtool命令选项`、`struct ethtool_ops成员函数`、`Ethtool命令显示参数的来源`，三者间的对应关系如下表所示：
 
 <table>
-
 <tbody>
-
 <tr>
-
 <th style="width: 100px;">命令选项</th>
-
 <th>struct ethtool_ops成员函数</th>
-
-<th>Ethtool命令显示参数的来源（以网卡驱动BNX2为例）</th>
-
-</tr>
-
+<th>Ethtool命令显示参数的来源（以网卡驱动BNX2为例）</th></tr>
 <tr>
-
 <td>无 -s</td>
-
 <td>get_settingsget_wol get_msglevel get_link set_settings set_wol set_msglevel</td>
-
 <td>从网卡寄存器中获得网卡速度等信息，可配置。</td>
-
 </tr>
-
 <tr>
-
 <td>-a -A</td>
-
 <td>get_pauseparam set_pauseparam</td>
-
 <td>从网卡寄存器中获得Autonegotiate/RX/TX模块的状态：on oroff，可配置。</td>
-
 </tr>
-
 <tr>
-
 <td>-c -C</td>
-
 <td>get_coalesceset_coalesce</td>
-
 <td>从网卡寄存器中获得coalescing参数：TX/RX一个数据包后，推迟发生TX/RX中断的时间(us)/数据包个数。—减小该值可以提高网卡的响应时间。 当rx-usecs&rx-frames同时被设为0时，RX中断停止。 当tx-usecs&tx-frames同时被设为0时，TX中断停止。</td>
-
 </tr>
-
 <tr>
-
 <td>-g -G</td>
-
 <td>get_ringparam set_ringparam</td>
-
 <td>除当前TX/RX ring的值（从网卡寄存器中读取得到，可配置）外，其它为网卡bnx2自己固定的信息。</td>
-
 </tr>
-
 <tr>
-
 <td>-k -K</td>
-
 <td>get_rx_csumget_tx_csum get_sg get_tso set_rx_csum set_tx_csum set_sg set_tso</td>
-
 <td>显示信息从保存该状态的变量中读取得到，没有对应的寄存器。因此，TX/RX校验等模块一直处于on状态，实际上是无法修改的。</td>
-
 </tr>
-
 <tr>
-
 <td>-i</td>
-
 <td>get_drvinfo[self_test_count, get_stats_coun,t get_regs_len, get_eeprom_len]</td>
-
 <td>网卡bnx2自己固定的信息，如：  
 ——————————————————–  
 driver: bnx2 version: 1.4.30 firmware-version: 1.8.0.5 bus-info: 0000:09:00.0  
 ——————————————————–</td>
-
 </tr>
-
 <tr>
-
 <td>-d</td>
-
 <td>get_drvinfoget_regs</td>
-
 <td>不支持，即bnx2中没有实现函数get_regs。</td>
-
 </tr>
-
 <tr>
-
 <td>-e -E</td>
-
 <td>get_eepromset_eeprom</td>
-
 <td>不支持，即bnx2中没有实现函数get_eeprom。</td>
-
 </tr>
-
 <tr>
-
 <td>-r</td>
-
 <td>nway_reset</td>
-
 <td>配置网卡MII_BMCR寄存器，重启Auto negotiation模块。</td>
-
 </tr>
-
 <tr>
-
 <td>-p</td>
-
 <td>phys_id</td>
-
 <td>配置网卡BNX2_EMAC_LED寄存器，实现LED闪功能。</td>
-
 </tr>
-
 <tr>
-
 <td>-t</td>
-
 <td>self_test</td>
-
 <td>通过配置网卡寄存器，逐一测试网卡的硬件模块：registers，memory，loopback，Link stat，interrupt。</td>
-
 </tr>
-
 <tr>
-
 <td>-S</td>
-
 <td>get_ethtool_stats</td>
-
 <td>显示信息来源于网卡驱动中的结构体变量stats_blk。（网卡通过DMA方式，将寄存器BNX2_HC_STATISTICS _ADDR_L和BNX2_HC_STATISTICS_ADDR_H中的数据实时地读取到结构体变量struct statistics_block *stats_blk中。） —显示的数据都是从网卡寄存器中统计得到的，各项的含义需查询网卡（芯片）手册。</td>
-
 </tr>
-
 </tbody>
-
 </table>
 
 由上可见，ethtool命令用于显示/配置网卡硬件（寄存器）。  
 
-### 实例  
+###  实例
 
 查看机器上网卡的速度：百兆还是千兆，请输入：
 
